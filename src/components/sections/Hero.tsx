@@ -1,26 +1,73 @@
 "use client";
-import { Suspense } from "react";
+
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowDown } from "lucide-react";
-import SplitText from "@/components/ui/SplitText";
-import MagneticButton from "@/components/ui/MagneticButton";
+import Portrait from "@/components/ui/Portrait";
+import { site } from "@/data/site";
+
+gsap.registerPlugin(ScrollTrigger);
+
 const Scene = dynamic(() => import("@/components/three/Scene"), { ssr: false });
+const sceneQuery = "(min-width: 768px) and (prefers-reduced-motion: no-preference)";
+
+function subscribeToScenePreference(update: () => void) {
+  const query = window.matchMedia(sceneQuery);
+  query.addEventListener("change", update);
+  return () => query.removeEventListener("change", update);
+}
+
 export default function Hero() {
-  return <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-    <div className="absolute inset-0 bg-linear-to-b from-background via-background to-accent/5" />
-    <div className="absolute inset-0 hidden md:block"><Suspense fallback={null}><Scene /></Suspense></div>
-    <div className="absolute inset-0 md:hidden bg-linear-to-br from-accent/10 via-background to-cyan/10" aria-hidden="true" />
-    <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
-      <SplitText as="p" className="text-accent text-xs md:text-sm font-mono tracking-[0.2em] uppercase mb-6" direction="right" scrollTrigger={false} delay={0.4}>DATA · TECHNOLOGY · CREATIVE WORK</SplitText>
-      <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold leading-tight mb-6">
-        <SplitText as="span" className="block" direction="up" scrollTrigger={false} delay={0.7}>Where Strategy</SplitText>
-        <SplitText as="span" className="block gradient-text" direction="center" scrollTrigger={false} delay={1}>Meets Creativity.</SplitText>
-      </h1>
-      <p className="text-foreground/75 text-lg font-medium mb-3">Deena Johnson</p>
-      <p className="text-foreground/60 text-base md:text-lg max-w-2xl mx-auto mb-10">Transforming complex ideas into meaningful digital experiences through data, technology, strategy, and visual storytelling.</p>
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4"><MagneticButton href="#projects">Explore My Work <ArrowDown size={16}/></MagneticButton><MagneticButton href="#contact" className="bg-transparent! border! border-foreground/20! text-foreground! hover:border-accent!">Connect</MagneticButton></div>
-    </div>
-    <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:2}} className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"><span className="text-xs text-foreground/50 uppercase tracking-widest">Scroll to explore</span><ArrowDown size={16} className="text-foreground/50"/></motion.div>
-  </section>;
+  const section = useRef<HTMLElement>(null);
+  const portrait = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(true);
+  const showScene = useSyncExternalStore(
+    subscribeToScenePreference,
+    () => window.matchMedia(sceneQuery).matches,
+    () => false,
+  );
+
+  useEffect(() => {
+    const element = section.current;
+    if (!showScene || !element) return;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [showScene]);
+
+  useEffect(() => {
+    const media = gsap.matchMedia();
+    media.add({
+      motion: "(prefers-reduced-motion: no-preference)",
+      desktop: "(min-width: 768px)",
+    }, ({ conditions }) => {
+      if (!conditions?.motion) return;
+      gsap.to(portrait.current, {
+        yPercent: conditions.desktop ? -8 : -3,
+        ease: "none",
+        scrollTrigger: { trigger: section.current, start: "top top", end: "bottom top", scrub: true },
+      });
+    });
+    return () => media.revert();
+  }, []);
+
+  return (
+    <section id="home" ref={section} className="hero-editorial">
+      {showScene && <div className="hero-scene" aria-hidden="true"><Scene active={inView} /></div>}
+      <div className="hero-composition">
+        <div className="hero-copy">
+          <p className="eyebrow mb-5">{site.name}</p>
+          <h1 className="editorial-heading">{site.headline}</h1>
+          <p className="mt-6 max-w-lg text-base leading-relaxed text-foreground/80 md:text-xl">{site.introduction}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a href="#projects" className="editorial-action editorial-primary">Explore my work <ArrowDown size={16} aria-hidden="true" /></a>
+            <a href="#contact" className="editorial-action">Connect</a>
+          </div>
+        </div>
+        <div ref={portrait} className="hero-portrait"><Portrait kind="hero" /></div>
+      </div>
+    </section>
+  );
 }

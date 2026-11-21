@@ -1,31 +1,53 @@
 # Deena Johnson portfolio editing guide
 
-This draft replaces the original developer's public-facing identity and sample projects. It has **not** been deployed or merged into `main`.
+Make edits on `personalize-deena-portfolio` and review them in draft PR #1. Preview before requesting approval to merge or publish.
 
-## Website content
-- `src/components/sections/Hero.tsx`: headline, introduction, and hero presentation
-- `src/components/sections/About.tsx`: biography and capability areas
-- `src/data/projects.ts`: portfolio categories and case-study entries
-- `src/components/sections/Projects.tsx`: portfolio filtering and project cards
-- `src/components/sections/Contact.tsx`: contact section (currently no live form)
-- `src/components/layout/Navbar.tsx` and `Footer.tsx`: navigation and footer
-- `src/app/layout.tsx`: SEO title and description
-- `src/app/globals.css`: colors and layout tokens
+## Edit your profile and links
 
-## Add approved photography
-Upload web-optimized copies of your original photographs to `public/images/portraits/`, then ask Codex to integrate them in the hero and About section.
-Recommended filenames: `hero-side.jpg`, `creative-side.jpg`, `professional-front.jpg`.
-Do not alter facial features or body proportions. Never commit high-resolution originals, private image metadata, confidential client information, or credentials to this public repository.
+Open `src/data/site.ts` to edit the headline, introduction, biography, capabilities, degrees, navigation, contact links, and search metadata. Keep the public domain in `url`. Enter a verified professional email as `mailto:your-approved-address` and use complete HTTPS URLs for LinkedIn, GitHub, SkyBridge Visuals, and any additional accounts. Blank links stay hidden. The site has no contact form. Verify new links in the preview and test actual delivery before announcing a new inbox or enabling a form.
 
-## Portfolio content
-The four projects in `src/data/projects.ts` are **placeholders**. Replace them only with verified and cleared case studies, photos, screenshots, measurements, and links.
-Do not reuse the original developer's project descriptions, employment claims, numerical outcomes, or code snippets.
+## Add approved portraits
 
-## Contact
-The former contact form displayed a success confirmation without transmitting messages. It has been removed. Add a real contact method or provider and test delivery before publishing.
+Prepare web-optimized JPEG copies, remove private EXIF and location metadata, and keep the high-resolution originals outside the repository. No changes to facial features, skin tone, or body proportions are needed. Add these files in `public/images/portraits/`.
 
-## Next technical checks
-Run `npm ci`, `npm run build`, verify responsive views, keyboard navigation, image crops, actual 3D performance, project filtering, and each project detail URL before merging. The new draft was edited through GitHub and has not been locally build-tested here.
+| Filename | Appears in |
+| --- | --- |
+| `hero-side.jpg` | Homepage hero |
+| `creative-side.jpg` | Photography & Creative Work |
+| `professional-front.jpg` | About |
+
+In `src/data/site.ts`, set `approved: true` for each uploaded portrait. The `position` value controls the focal point using CSS percentages. Review the crop at 390px and 1440px before publishing. The placeholder stays visible when a portrait is unapproved or fails to load.
+
+## Publish a case study
+
+Edit `src/data/projects.ts`. Each entry supplies a title, description, category, thumbnail, search tags, and unique URL slug. Keep existing slugs to preserve links. Copy a category label exactly from `categories`, or update that list and the affected entries together.
+
+Leave `caseStudy` absent for a public Coming soon page. To publish an approved entry, replace its placeholder thumbnail, add meaningful alt text, and add the fields below. Save approved web media under `public/images/` or `public/videos/`. Public file references omit the leading `public` folder. Add only cleared work, avoid confidential material, and substantiate every outcome.
+
+```ts
+caseStudy: {
+  featured: { src: "/images/your-feature.jpg", alt: "Describe what the image shows" },
+  objective: "What the project aimed to accomplish",
+  brief: "The approved business problem or creative brief",
+  role: "Your own responsibilities",
+  tools: ["Tools you used"],
+  process: "How you approached the work",
+  deliverables: ["Approved deliverables"],
+  outcomes: [],
+  gallery: [
+    { src: "/images/your-gallery-image.jpg", alt: "Describe the image", caption: "Optional context" },
+  ],
+  video: { src: "/videos/your-project.mp4", captions: "/videos/your-project.vtt" },
+  demo: "https://your-approved-demo.example",
+},
+```
+
+Omit `gallery`, `video`, or `demo` when unavailable. Add verified outcomes when available. Include a WebVTT caption track for each listed video. Gallery images can be browsed and opened in a fullscreen dialog. Only completed case studies appear in the sitemap, and placeholder routes request no indexing.
+
+## Verify your edits
+
+Run `npm ci`, `npm run build`, and `npx tsc --noEmit`. Run `npm run start` to preview the production build. Check the hero and portrait crops at desktop and mobile widths. Test the navigation, category filters, search, each project link, and every new contact link. For new gallery or video content, verify fullscreen navigation, Escape dismissal, playback, and captions. Check keyboard focus and the operating system’s reduced-motion mode.
 
 ## Credits
-This portfolio was forked from KaranChandekar/interactive-3d-portfolio. Preserve the original applicable license and attribution.
+
+This portfolio was forked from KaranChandekar/interactive-3d-portfolio. Preserve applicable license and attribution.

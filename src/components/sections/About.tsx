@@ -1,22 +1,32 @@
-"use client";
-import { motion } from "framer-motion";
-import SplitText from "@/components/ui/SplitText";
-const capabilities = [
-  { title: "Data & Business Intelligence", detail: "Power BI, SQL, dashboard development, KPI reporting and executive analytics" },
-  { title: "Technology & Transformation", detail: "Technology operations, process improvement, enterprise AI governance and spend oversight" },
-  { title: "Finance & Operations", detail: "Financial analysis, operational reporting and technology cost visibility" },
-  { title: "Visual Storytelling", detail: "Photography, drone imagery and creative digital experiences" },
-];
+import Portrait from "@/components/ui/Portrait";
+import { site } from "@/data/site";
+
 export default function About() {
-  return <section id="about" className="relative py-24 md:py-32 px-6 overflow-hidden">
-    <div className="max-w-6xl mx-auto">
-      <SplitText as="h2" className="text-3xl md:text-5xl font-bold mb-8" direction="up">About Deena</SplitText>
-      <motion.p initial={{opacity:0,y:18}} whileInView={{opacity:1,y:0}} viewport={{once:true}} className="text-lg md:text-2xl text-foreground/75 max-w-4xl leading-relaxed mb-8">
-        I work at the intersection of business, technology and creative storytelling. My experience spans enterprise technology operations, business intelligence, financial analysis and digital transformation. I turn complex information into clearer decisions and compelling visual experiences.
-      </motion.p>
-      <p className="text-foreground/55 max-w-3xl leading-relaxed mb-12">My portfolio brings together analytical work and creative projects, including dashboards, consulting, drone imagery and photography. Case studies and image galleries will be added as approved work becomes available.</p>
-      <div className="grid md:grid-cols-2 gap-5">{capabilities.map((item,i)=><motion.div key={item.title} initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:i*.09}} className="rounded-2xl border border-border bg-white/3 p-6"><h3 className="font-semibold text-lg mb-3 text-accent">{item.title}</h3><p className="text-foreground/60 leading-relaxed">{item.detail}</p></motion.div>)}</div>
-      <div className="mt-12 text-sm text-foreground/55"><strong className="text-foreground/80">Education:</strong> B.S. Accounting · M.S. Management Information Systems</div>
-    </div>
-  </section>;
+  return (
+    <section id="about" className="px-6 py-20 md:py-28">
+      <div className="mx-auto max-w-6xl">
+        <div className="grid gap-10 md:grid-cols-[2fr_3fr] md:items-center">
+          <Portrait kind="professional" />
+          <div>
+            <h2 className="section-heading">About {site.name}</h2>
+            <div className="mt-5 space-y-4 text-lg leading-relaxed text-foreground/80">
+              {site.biography.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            </div>
+            <h3 className="eyebrow mt-8 mb-3">Education</h3>
+            <ul className="space-y-1 text-foreground/75">
+              {site.education.map((degree) => <li key={degree}>{degree}</li>)}
+            </ul>
+          </div>
+        </div>
+        <div className="mt-12 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+          {site.capabilities.map(({ title, detail }) => (
+            <div key={title} className="border-t border-border pt-4">
+              <h3 className="text-lg font-semibold text-accent">{title}</h3>
+              <p className="mt-2 text-foreground/75">{detail}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
