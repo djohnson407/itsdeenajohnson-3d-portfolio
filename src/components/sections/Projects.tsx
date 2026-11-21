@@ -39,9 +39,9 @@ function ProjectCard({
   };
 
   const categoryColor =
-    project.category === "AI Applications"
+    project.category === "Data & Analytics"
       ? "bg-emerald-500/10 text-emerald-400"
-      : project.category === "Professional"
+      : project.category === "Technology & Consulting"
         ? "bg-amber-500/10 text-amber-400"
         : "bg-accent/10 text-accent/80";
 
@@ -174,7 +174,7 @@ export default function Projects() {
             className="text-3xl md:text-5xl font-bold"
             direction="center"
           >
-            Selected Projects
+            Explore My Portfolio
           </SplitText>
           <motion.p
             initial={{ opacity: 0, y: 15 }}
@@ -187,8 +187,7 @@ export default function Projects() {
             <span className="text-foreground/70 font-medium">
               {projects.length} projects
             </span>{" "}
-            spanning AI applications, interactive websites, and professional
-            work.
+            spanning data, technology, drone visuals, and creative work.
           </motion.p>
         </div>
 
