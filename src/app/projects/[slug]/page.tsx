@@ -135,9 +135,9 @@ export default function ProjectDetail({
             <div className="flex items-center gap-3 mb-3">
               <span
                 className={`text-[11px] px-3 py-1 rounded-full font-mono tracking-wider uppercase backdrop-blur-md ${
-                  project.category === "AI Applications"
+                  project.category === "Data & Analytics"
                     ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-                    : project.category === "Professional"
+                    : project.category === "Technology & Consulting"
                       ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
                       : "bg-accent/15 text-accent/80 border border-accent/20"
                 }`}
@@ -201,9 +201,9 @@ export default function ProjectDetail({
             <p className="text-foreground/60 leading-relaxed mb-6">
               {project.solution}
             </p>
-            <pre className="bg-foreground/5 border border-border rounded-xl p-6 overflow-x-auto text-sm font-mono text-foreground/70">
+            {project.codeSnippet && <pre className="bg-foreground/5 border border-border rounded-xl p-6 overflow-x-auto text-sm font-mono text-foreground/70">
               <code>{project.codeSnippet}</code>
-            </pre>
+            </pre>}
           </motion.section>
 
           {/* Tech Stack */}
@@ -228,7 +228,7 @@ export default function ProjectDetail({
           </motion.section>
 
           {/* Outcomes */}
-          <motion.section
+          {project.outcomes.length > 0 && <motion.section
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -251,7 +251,7 @@ export default function ProjectDetail({
                 </div>
               ))}
             </div>
-          </motion.section>
+          </motion.section>}
 
           {/* Gallery */}
           <motion.section
