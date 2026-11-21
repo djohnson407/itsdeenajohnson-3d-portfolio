@@ -93,7 +93,7 @@ function ParticleField() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.02} color="#7c3aed" transparent opacity={0.3} sizeAttenuation />
+      <pointsMaterial size={0.02} color="#96A9B2" transparent opacity={0.3} sizeAttenuation />
     </points>
   );
 }
@@ -111,13 +111,13 @@ function Shapes() {
   return (
     <>
       <group ref={bgRef}>
-        <GeometricShape geometry="icosahedron" position={[-4, 2, -6]} color="#4338ca" speed={0.4} floatIntensity={0.4} scale={0.5} />
-        <GeometricShape geometry="octahedron" position={[4, -2, -5]} color="#7e22ce" speed={0.3} floatIntensity={0.3} scale={0.4} />
+        <GeometricShape geometry="icosahedron" position={[-4, 2, -6]} color="#677985" speed={0.4} floatIntensity={0.4} scale={0.5} />
+        <GeometricShape geometry="octahedron" position={[4, -2, -5]} color="#8c7961" speed={0.3} floatIntensity={0.3} scale={0.4} />
       </group>
       <group ref={fgRef}>
-        <GeometricShape geometry="icosahedron" position={[-2.5, 0.5, -1]} color="#6366f1" speed={1} floatIntensity={1.2} scale={1} />
-        <GeometricShape geometry="torus" position={[2.5, -0.5, -2]} color="#a855f7" speed={0.7} floatIntensity={0.8} scale={0.9} />
-        <GeometricShape geometry="octahedron" position={[0, 1.5, -1.5]} color="#ec4899" speed={0.8} floatIntensity={1} scale={0.8} />
+        <GeometricShape geometry="icosahedron" position={[-2.5, 0.5, -1]} color="#96A9B2" speed={1} floatIntensity={1.2} scale={1} />
+        <GeometricShape geometry="torus" position={[2.5, -0.5, -2]} color="#C6AD83" speed={0.7} floatIntensity={0.8} scale={0.9} />
+        <GeometricShape geometry="octahedron" position={[0, 1.5, -1.5]} color="#AD9D89" speed={0.8} floatIntensity={1} scale={0.8} />
       </group>
     </>
   );
@@ -140,18 +140,19 @@ function Camera() {
   return null;
 }
 
-export default function Scene() {
+export default function Scene({ active }: { active: boolean }) {
   return (
     <Canvas
       camera={{ position: [0, 0, 5], fov: 45 }}
       dpr={[1, 1.5]}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       style={{ background: "transparent" }}
-      frameloop="always"
+      frameloop={active ? "always" : "never"}
+      fallback={null}
     >
       <ambientLight intensity={0.5} />
       <directionalLight position={[5, 5, 5]} intensity={1} />
-      <pointLight position={[-5, -3, 4]} intensity={0.6} color="#7c3aed" />
+      <pointLight position={[-5, -3, 4]} intensity={0.6} color="#96A9B2" />
       <Camera />
       <ParticleField />
       <Shapes />

@@ -11,7 +11,7 @@ import {
   type Project,
   type ProjectCategory,
 } from "@/data/projects";
-import SplitText from "@/components/ui/SplitText";
+import Portrait from "@/components/ui/Portrait";
 
 function ProjectCard({
   project,
@@ -24,7 +24,7 @@ function ProjectCard({
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const card = cardRef.current;
-    if (!card || window.innerWidth < 1024) return;
+    if (!card || !window.matchMedia("(min-width: 1024px) and (hover: hover) and (prefers-reduced-motion: no-preference)").matches) return;
     const rect = card.getBoundingClientRect();
     const x = ((e.clientY - rect.top) / rect.height - 0.5) * 8;
     const y = -((e.clientX - rect.left) / rect.width - 0.5) * 8;
@@ -37,13 +37,6 @@ function ProjectCard({
     card.style.transform =
       "perspective(800px) rotateX(0) rotateY(0) scale3d(1,1,1)";
   };
-
-  const categoryColor =
-    project.category === "AI Applications"
-      ? "bg-emerald-500/10 text-emerald-400"
-      : project.category === "Professional"
-        ? "bg-amber-500/10 text-amber-400"
-        : "bg-accent/10 text-accent/80";
 
   return (
     <motion.div
@@ -67,7 +60,7 @@ function ProjectCard({
           {/* Category badge */}
           <div className="absolute top-3 left-3 z-10">
             <span
-              className={`text-[10px] px-2.5 py-1 rounded-full font-mono tracking-wider uppercase backdrop-blur-md ${categoryColor}`}
+              className="rounded-full bg-background/95 px-2.5 py-1 text-xs text-foreground"
             >
               {project.category}
             </span>
@@ -77,7 +70,7 @@ function ProjectCard({
           <div className="relative h-52 overflow-hidden">
             <Image
               src={project.thumbnail}
-              alt={project.title}
+              alt={project.thumbnailAlt ?? ""}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -85,7 +78,7 @@ function ProjectCard({
             <div className="absolute inset-0 bg-linear-to-t from-background/90 via-background/20 to-transparent" />
             {/* Hover arrow */}
             <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-accent/90 flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-              <ArrowUpRight size={18} className="text-white" />
+              <ArrowUpRight size={18} className="text-background" />
             </div>
           </div>
 
@@ -94,7 +87,8 @@ function ProjectCard({
             <h3 className="text-base font-bold mb-1.5 group-hover:text-accent transition-colors duration-200">
               {project.title}
             </h3>
-            <p className="text-sm text-foreground/45 line-clamp-2 mb-4 leading-relaxed">
+            {!project.caseStudy && <p className="mb-2 text-xs text-accent">Coming soon</p>}
+            <p className="text-sm text-foreground/75 line-clamp-2 mb-4 leading-relaxed">
               {project.description}
             </p>
 
@@ -103,13 +97,13 @@ function ProjectCard({
               {project.tags.slice(0, 4).map((tag) => (
                 <span
                   key={tag}
-                  className="text-[11px] px-2.5 py-1 rounded-full bg-accent/8 text-accent/70 font-mono tracking-wide"
+                  className="text-[11px] px-2.5 py-1 rounded-full bg-accent/8 text-accent font-mono tracking-wide"
                 >
                   {tag}
                 </span>
               ))}
               {project.tags.length > 4 && (
-                <span className="text-[11px] px-2.5 py-1 rounded-full bg-white/5 text-foreground/30 font-mono">
+                <span className="text-[11px] px-2.5 py-1 rounded-full bg-white/5 text-foreground/65 font-mono">
                   +{project.tags.length - 4}
                 </span>
               )}
@@ -169,27 +163,7 @@ export default function Projects() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <SplitText
-            as="h2"
-            className="text-3xl md:text-5xl font-bold"
-            direction="center"
-          >
-            Selected Projects
-          </SplitText>
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-foreground/45 mt-4 max-w-lg mx-auto text-sm md:text-base"
-          >
-            A collection of{" "}
-            <span className="text-foreground/70 font-medium">
-              {projects.length} projects
-            </span>{" "}
-            spanning AI applications, interactive websites, and professional
-            work.
-          </motion.p>
+          <h2 className="section-heading">Explore my portfolio</h2>
         </div>
 
         {/* Filters bar */}
@@ -201,15 +175,16 @@ export default function Projects() {
           className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10"
         >
           {/* Category tabs */}
-          <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-white/3 border border-white/6 backdrop-blur-sm">
+          <div className="flex max-w-full flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-white/3 border border-white/6 backdrop-blur-sm">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
+                aria-pressed={activeCategory === category}
                 className={`relative px-4 py-2 text-sm font-medium rounded-xl transition-colors duration-200 ${
                   activeCategory === category
                     ? "text-white"
-                    : "text-foreground/40 hover:text-foreground/70"
+                    : "text-foreground/70 hover:text-foreground/70"
                 }`}
               >
                 {activeCategory === category && (
@@ -242,21 +217,24 @@ export default function Projects() {
                 >
                   <input
                     type="text"
-                    placeholder="Search projects..."
+                    placeholder="Search projects…"
+                    aria-label="Search projects"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     autoFocus
-                    className="w-full px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-foreground placeholder:text-foreground/25 focus:outline-none focus:border-accent/40 transition-colors"
+                    className="w-full px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-foreground placeholder:text-foreground/70 focus:outline-none focus:border-accent/40 transition-colors"
                   />
                 </motion.div>
               )}
             </AnimatePresence>
             <button
+              aria-label={showSearch ? "Close search" : "Open search"}
+              aria-expanded={showSearch}
               onClick={() => {
                 setShowSearch(!showSearch);
                 if (showSearch) setSearchQuery("");
               }}
-              className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-foreground/40 hover:text-foreground/70 hover:border-white/20 transition-colors"
+              className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-foreground/70 hover:text-foreground/70 hover:border-white/20 transition-colors"
             >
               {showSearch ? <X size={16} /> : <Search size={16} />}
             </button>
@@ -268,14 +246,14 @@ export default function Projects() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-sm text-foreground/30 mb-6"
+            className="text-sm text-foreground/65 mb-6" role="status"
           >
             Showing {filteredProjects.length} of {projects.length} projects
             {searchQuery && (
               <>
                 {" "}
                 for &ldquo;
-                <span className="text-accent/70">{searchQuery}</span>&rdquo;
+                <span className="text-accent">{searchQuery}</span>&rdquo;
               </>
             )}
           </motion.p>
@@ -323,7 +301,7 @@ export default function Projects() {
               ) : (
                 <>
                   Show More
-                  <span className="text-accent/60 text-xs">
+                  <span className="text-accent text-xs">
                     +{filteredProjects.length - INITIAL_COUNT}
                   </span>
                   <ChevronDown
@@ -343,10 +321,10 @@ export default function Projects() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-20"
           >
-            <p className="text-foreground/30 text-lg mb-2">
+            <p className="text-foreground/65 text-lg mb-2">
               No projects found
             </p>
-            <p className="text-foreground/20 text-sm">
+            <p className="text-foreground/65 text-sm">
               Try a different category or search term
             </p>
             <button
@@ -355,11 +333,20 @@ export default function Projects() {
                 setSearchQuery("");
                 setShowSearch(false);
               }}
-              className="mt-4 px-4 py-2 text-sm text-accent/70 hover:text-accent border border-accent/20 hover:border-accent/40 rounded-xl transition-colors"
+              className="mt-4 px-4 py-2 text-sm text-accent hover:text-accent border border-accent/20 hover:border-accent/40 rounded-xl transition-colors"
             >
               Show all projects
             </button>
           </motion.div>
+        )}
+        {(activeCategory === "All" || activeCategory === "Photography & Creative Work") && !searchQuery.trim() && (
+          <div className="mx-auto mt-16 grid max-w-5xl items-center gap-8 md:grid-cols-[1fr_1.3fr]">
+            <Portrait kind="creative" />
+            <div>
+              <h3 className="section-heading text-pretty">Photography &amp; creative work</h3>
+              <p className="mt-4 max-w-md text-foreground/75">Editorial photography, professional portraits, and creative digital collections.</p>
+            </div>
+          </div>
         )}
       </div>
     </section>

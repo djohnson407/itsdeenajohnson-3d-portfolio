@@ -1,26 +1,23 @@
 import type { Metadata } from "next";
-import { spaceGrotesk, jetbrainsMono } from "@/lib/fonts";
+import { site } from "@/data/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Karan Chandekar | Software Engineer",
-  description:
-    "Software Engineer with 3+ years of experience building AI-powered full-stack applications with React, Next.js, TypeScript, and Python.",
+  metadataBase: new URL(site.url),
+  title: { default: site.seo.title, template: `%s | ${site.name}` },
+  description: site.seo.description,
+  openGraph: {
+    title: site.seo.title,
+    description: site.seo.description,
+    siteName: site.name,
+    type: "website",
+  },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased`}
-    >
-      <body className="min-h-screen bg-background text-foreground">
-        {children}
-      </body>
+    <html lang="en" className="antialiased">
+      <body className="min-h-screen bg-background text-foreground">{children}</body>
     </html>
   );
 }

@@ -1,179 +1,73 @@
 "use client";
 
-import { Suspense } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowDown } from "lucide-react";
-import SplitText from "@/components/ui/SplitText";
-import MagneticButton from "@/components/ui/MagneticButton";
+import Portrait from "@/components/ui/Portrait";
+import { site } from "@/data/site";
 
-const Scene = dynamic(() => import("@/components/three/Scene"), {
-  ssr: false,
-});
+gsap.registerPlugin(ScrollTrigger);
 
-function SceneFallback() {
-  return (
-    <div className="absolute inset-0 flex items-center justify-center">
-      <div className="w-16 h-16 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
-}
+const Scene = dynamic(() => import("@/components/three/Scene"), { ssr: false });
+const sceneQuery = "(min-width: 768px) and (prefers-reduced-motion: no-preference)";
 
-function MobileHero() {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* Animated gradient orbs */}
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.15, 0.25, 0.15],
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-accent blur-[100px]"
-      />
-      <motion.div
-        animate={{
-          scale: [1.2, 1, 1.2],
-          opacity: [0.1, 0.2, 0.1],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full bg-cyan blur-[80px]"
-      />
-      <svg
-        viewBox="0 0 400 400"
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 opacity-10"
-      >
-        <motion.polygon
-          points="200,50 350,150 300,320 100,320 50,150"
-          fill="none"
-          stroke="#7c3aed"
-          strokeWidth="1"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          style={{ transformOrigin: "200px 200px" }}
-        />
-        <motion.circle
-          cx="200"
-          cy="200"
-          r="150"
-          fill="none"
-          stroke="#a855f7"
-          strokeWidth="0.5"
-          strokeDasharray="10 5"
-          animate={{ rotate: -360 }}
-          transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-          style={{ transformOrigin: "200px 200px" }}
-        />
-      </svg>
-    </div>
-  );
+function subscribeToScenePreference(update: () => void) {
+  const query = window.matchMedia(sceneQuery);
+  query.addEventListener("change", update);
+  return () => query.removeEventListener("change", update);
 }
 
 export default function Hero() {
+  const section = useRef<HTMLElement>(null);
+  const portrait = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(true);
+  const showScene = useSyncExternalStore(
+    subscribeToScenePreference,
+    () => window.matchMedia(sceneQuery).matches,
+    () => false,
+  );
+
+  useEffect(() => {
+    const element = section.current;
+    if (!showScene || !element) return;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [showScene]);
+
+  useEffect(() => {
+    const media = gsap.matchMedia();
+    media.add({
+      motion: "(prefers-reduced-motion: no-preference)",
+      desktop: "(min-width: 768px)",
+    }, ({ conditions }) => {
+      if (!conditions?.motion) return;
+      gsap.to(portrait.current, {
+        yPercent: conditions.desktop ? -8 : -3,
+        ease: "none",
+        scrollTrigger: { trigger: section.current, start: "top top", end: "bottom top", scrub: true },
+      });
+    });
+    return () => media.revert();
+  }, []);
+
   return (
-    <section
-      id="home"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
-    >
-      {/* Gradient background base */}
-      <div className="absolute inset-0 bg-linear-to-b from-background via-background to-accent/5" />
-
-      {/* 3D Canvas - Desktop only */}
-      <div className="absolute inset-0 hidden md:block">
-        <Suspense fallback={<SceneFallback />}>
-          <Scene />
-        </Suspense>
-      </div>
-
-      {/* Mobile fallback */}
-      <div className="md:hidden">
-        <MobileHero />
-      </div>
-
-      {/* Content overlay */}
-      <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-        <div className="mb-4">
-          <SplitText
-            as="p"
-            className="text-accent text-sm md:text-base font-mono tracking-wider uppercase"
-            direction="right"
-            scrollTrigger={false}
-            delay={0.5}
-          >
-            Software Engineer
-          </SplitText>
+    <section id="home" ref={section} className="hero-editorial">
+      {showScene && <div className="hero-scene" aria-hidden="true"><Scene active={inView} /></div>}
+      <div className="hero-composition">
+        <div className="hero-copy">
+          <p className="eyebrow mb-5">{site.name}</p>
+          <h1 className="editorial-heading">{site.headline}</h1>
+          <p className="mt-6 max-w-lg text-base leading-relaxed text-foreground/80 md:text-xl">{site.introduction}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a href="#projects" className="editorial-action editorial-primary">Explore my work <ArrowDown size={16} aria-hidden="true" /></a>
+            <a href="#contact" className="editorial-action">Connect</a>
+          </div>
         </div>
-
-        <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold leading-tight mb-6">
-          <SplitText
-            as="span"
-            className="block"
-            direction="up"
-            scrollTrigger={false}
-            delay={0.8}
-          >
-            Hello, I&apos;m
-          </SplitText>
-          <SplitText
-            as="span"
-            className="block text-transparent bg-clip-text bg-linear-to-r from-accent via-accent-light to-cyan"
-            direction="center"
-            scrollTrigger={false}
-            delay={1.2}
-          >
-            Karan Chandekar
-          </SplitText>
-        </h1>
-
-        <div className="mb-10">
-          <SplitText
-            as="p"
-            className="text-foreground/60 text-base md:text-lg max-w-xl mx-auto"
-            direction="up"
-            scrollTrigger={false}
-            delay={1.6}
-            stagger={0.02}
-          >
-            I build AI-powered full-stack applications with modern web technologies
-          </SplitText>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2, duration: 0.6 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
-        >
-          <MagneticButton href="#projects">
-            View My Work
-            <ArrowDown size={16} />
-          </MagneticButton>
-          <MagneticButton
-            href="#contact"
-            className="bg-transparent! border! border-foreground/20! text-foreground! hover:border-accent! hover:text-accent!"
-          >
-            Get In Touch
-          </MagneticButton>
-        </motion.div>
+        <div ref={portrait} className="hero-portrait"><Portrait kind="hero" /></div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-      >
-        <span className="text-xs text-foreground/40 uppercase tracking-widest">
-          Scroll
-        </span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <ArrowDown size={16} className="text-foreground/40" />
-        </motion.div>
-      </motion.div>
     </section>
   );
 }
